@@ -13,8 +13,9 @@ module DockerVolumeNfs
     # Calculates all usage for a given ssh instance
     # @return [Array]
     def usage
-      data = remote_exec %q(sudo bash -c 'du --block-size 1024 -s /var/lib/docker/volumes/*')
-      data.gsub("/var/lib/docker/volumes/","").split("\n").map {|i| i.split("\t")}.map {|i,k| {size: i.strip, id: k.strip} }
+      raise Error, 'Missing NFS Remote Path' if DockerVolumeNfs.config[:nfs_remote_path].count('/').zero?
+      data = remote_exec %Q(sudo bash -c 'du --block-size 1024 -s #{DockerVolumeNfs.config[:nfs_remote_path]}/*')
+      data.gsub("#{DockerVolumeNfs.config[:nfs_remote_path]}/","").split("\n").map {|i| i.split("\t")}.map {|i,k| {size: i.strip, id: k.strip} }
     rescue
       []
     end
