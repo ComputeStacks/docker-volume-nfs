@@ -1,90 +1,95 @@
 module DockerVolumeNfs
-  class Volume < Connection
+  # @!attribute errors
+  #   @return [Array]
+  # @!attribute instance
+  #   @return [TestMocks::Volume]
+  class Volume
 
-    attr_accessor :id,
-                  :labels,
-                  :errors
+    attr_accessor :errors,
+                  :instance
 
-
-    def initialize(id, labels = {})
-      raise VolumeError, 'Missing Volume ID' if id.blank?
-      self.id = id
-      self.labels = labels
+    # @param [TestMocks::Volume]
+    def initialize(instance)
+      self.instance = instance
       self.errors = []
     end
 
     # @return [Boolean]
     def provisioned?
-      Docker::Volume.get(id, client).is_a? Docker::Volume
-    rescue Docker::Error::NotFoundError
-      false
+      result = true
+      instance.nodes.each do |node|
+        result = docker_client(node).is_a?(Docker::Volume)
+        break unless result # halt if failed
+      end
+      result
     end
 
     # @return [Boolean]
     def create!
-      raise VolumeError, 'Missing Labels' if labels.empty?
-      return true if provisioned?
-      unless init_nfs_server!
-        errors << "Fatal error provisioning path on storage server" if errors.empty?
+      raise VolumeError, 'Missing Volume' if instance.nil?
+      unless DockerVolumeNfs::StorageBackend.new(instance.region.nfs_remote_host).initialize_storage_backend!(volume_path)
+        errors << "Fatal error provisioning NFS backend"
         return false
       end
-      vol_data = {
-        'Labels' => labels,
-        'Driver' => 'local',
-        'DriverOpts' => {
-          'type' => 'nfs',
-          'o' => %Q(addr=#{DockerVolumeNfs.config[:nfs_host]},rw,nfsvers=4,async),
-          'device' => %Q(:#{volume_path})
-        }
-      }
-      result = Docker::Volume.create(id, vol_data, client)
-      return true if result.is_a?(Docker::Volume)
-      errors << result.inspect
-      false
+      instance.nodes.each do |node|
+        result = Docker::Volume.create(instance.name, volume_data, DockerVolumeNfs::Node.new(node).client)
+        unless result.is_a?(Docker::Volume)
+          errors << "Fatal error provisioning volume on node: #{node.label}"
+          return false
+        end
+      end
+      errors.empty?
     end
 
     # @return [Boolean]
-    def destroy!
-      obj = Docker::Volume.get(id, client)
-      if obj.remove({}, client).blank?
-        trash_nfs_path!
-      else
-        errors << "Error removing volume from docker. Volume still exists on remote server."
-        false
+    def destroy
+      success = true
+      instance.nodes.each do |node|
+        client = DockerVolumeNfs::Node.new(node).client
+        success = docker_client(node).remove({}, client).blank?
+        break unless success
       end
+      unless success
+        errors << "Error removing volume from docker. Volume still exists on remote server."
+        return false
+      end
+      storage_server.purge_volume_path!(volume_path)
     rescue Docker::Error::NotFoundError
       true
     end
 
-    def volume_path
-      raise Error, 'Missing NFS Remote Path' if DockerVolumeNfs.config[:nfs_remote_path].count('/').zero?
-      %Q(#{DockerVolumeNfs.config[:nfs_remote_path]}/#{id})
-    end
-
     private
 
-    ##
-    # Ensure our directory exists on the NFS server
-    #
-    # @return [Boolean]
-    def init_nfs_server!
-      remote_exec %Q(mkdir -p #{volume_path})
-      true
-    rescue => e
-      errors << "Fatal error: #{e.message}"
-      false
+    # @return [String]
+    def volume_path
+      %Q(#{instance.region.nfs_remote_path}/#{instance.name})
     end
 
-    ##
-    # Remove remote directory
-    #
-    # @return [Boolean]
-    def trash_nfs_path!
-      remote_exec %Q(rm -rf #{volume_path})
-      true
-    rescue => e
-      errors << "Fatal error: #{e.message}"
-      false
+    # @return [Hash]
+    def volume_data
+      {
+        'Labels' => {
+          'name' => instance.name,
+          'deployment_id' => instance.deployment.id.to_s,
+          'service_id' => instance.container_service.id.to_s
+        },
+        'Driver' => 'local',
+        'DriverOpts' => {
+          'type' => 'nfs',
+          'o' => %Q(addr=#{instance.region.nfs_remote_host},rw,nfsvers=4,async),
+          'device' => %Q(:#{volume_path})
+        }
+      }
+    end
+
+    # @return [DockerVolumeNfs::StorageBackend]
+    def storage_server
+      DockerVolumeNfs::StorageBackend.new(instance.region.nfs_remote_host)
+    end
+
+    # @return [Docker::Volume]
+    def docker_client(node)
+      Docker::Volume.get(instance.name, DockerVolumeNfs::Node.new(node).client)
     end
 
   end

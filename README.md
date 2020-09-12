@@ -6,5 +6,5 @@ Docker volume driver for NFS storage, using ComputeStacks.
 
 ```bash
 gem build docker_volume_nfs.gemspec
-gem push --key github --host https://rubygems.pkg.github.com/ComputeStacks docker_volume_nfs-0.1.0.gem
+gem push --key github --host https://rubygems.pkg.github.com/ComputeStacks docker_volume_nfs-0.2.0.gem
 ```

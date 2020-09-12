@@ -3,39 +3,84 @@ require "active_support/core_ext/object/blank"
 require 'docker'
 require 'net/ssh'
 
-require 'docker_volume_nfs/connection'
 require 'docker_volume_nfs/errors'
+require 'docker_volume_nfs/node'
+require 'docker_volume_nfs/region'
+require 'docker_volume_nfs/ssh_client'
+require 'docker_volume_nfs/storage_backend'
 require "docker_volume_nfs/version"
 require 'docker_volume_nfs/volume'
 
 module DockerVolumeNfs
 
-  @config = {
-    node_address: nil, # tcp://127.0.0.1:3306
-    ssh_address: nil, # 127.0.0.1 -- How this plugin will connect to the nfs server.
-    ssh_key: nil, # /path/to/ssh/key
-    ssh_port: 22,
-    ssh_user: 'root',
-    nfs_host: '', # Host used to connect from node to nfs server
-    nfs_remote_path: ''
-  }
-
   ##
-  # Does this use the native Docker::Volume to create the volume?
+  # Define settings for the user to provide
   #
-  # If true, ComputeStacks will use the docker volume API to build
-  # this volume.
+  # The order of the fields is determined by their position in the list.
   #
-  def native_docker_volume?
-    true
-  end
+  # Fields:
+  #
+  # name: must be lower case, no numbers, spaces, or special characters (except _).
+  # label: The name of the field shown in the UI
+  # description: Displayed under the field to help the user
+  # field_type:
+  #   * string | Short text field
+  #   * text | Textarea
+  #   * password | Will store result encrypted and use a password field on the UI
+  #   * checkbox | Will display a checkbox and store it as a boolean value
+  #   * dropdown | Presents a list of values
+  #
+  @settings = [
+    {
+      name: 'ssh_key',
+      label: 'SSH Key',
+      description: 'Path to SSH Key on server',
+      field_type: 'string',
+      default: '~/.ssh/id_rsa'
+    },
+    {
+      name: 'region_ssh_user',
+      label: 'SSH Username',
+      description: 'SSH Username for connecting to the NFS Server',
+      field_type: 'string',
+      default: 'root'
+    },
+    {
+      name: 'region_ssh_port',
+      label: 'SSH Port',
+      description: 'SSH Port for connecting to the NFS Server',
+      field_type: 'string',
+      default: '22'
+    }
+  ]
 
-  def self.configure(opts = {})
-    opts.each {|k,v| @config[k.to_sym] = v if @config.keys.include? k.to_sym}
-  end
+  @config = @settings.map { |i| { i[:name].to_sym => i[:default] } }.reduce Hash.new, :merge
 
-  def self.config
-    @config
+  class << self
+    ##
+    # Is this clustered storage?
+    #
+    # If true, we will assume all nodes have access to this storage driver.
+    # This also means that the Region class will need to define the usage.
+    #
+    # If false, we assume each node is separate and usage will be calculated per-node.
+    # This means that users will be billed for their usage per-node, not per-region.
+    #
+    def clustered_storage?
+      true
+    end
+
+    def configure(opts = {})
+      opts.each {|k,v| @config[k.to_sym] = v if @config.keys.include? k.to_sym}
+    end
+
+    def config
+      @config
+    end
+
+    def settings
+      @settings
+    end
   end
 
 end

@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: unix:///var/run/docker.sock/v1.16/volumes/690a2d87-08de-4834-8cff-cecce76ecb89
+    uri: https://192.168.173.10:2376/v1.16/volumes/690a2d87-08de-4834-8cff-cecce76ecb89
     body:
       encoding: US-ASCII
       string: ''
@@ -20,28 +20,28 @@ http_interactions:
     headers:
       Api-Version:
       - '1.40'
-      Content-Length:
-      - '418'
       Content-Type:
       - application/json
-      Date:
-      - Fri, 11 Sep 2020 17:58:02 GMT
       Docker-Experimental:
       - 'true'
       Ostype:
       - linux
       Server:
       - Docker/19.03.12 (linux)
+      Date:
+      - Sat, 12 Sep 2020 03:05:33 GMT
+      Content-Length:
+      - '421'
     body:
       encoding: ASCII-8BIT
-      string: '{"CreatedAt":"2020-09-11T17:58:02Z","Driver":"local","Labels":{"deployment_id":"10","name":"690a2d87-08de-4834-8cff-cecce76ecb89","service_id":"10"},"Mountpoint":"/var/lib/docker/volumes/690a2d87-08de-4834-8cff-cecce76ecb89/_data","Name":"690a2d87-08de-4834-8cff-cecce76ecb89","Options":{"device":":/tmp/690a2d87-08de-4834-8cff-cecce76ecb89","o":"addr=192.168.173.10,rw,nfsvers=4,async","type":"nfs"},"Scope":"local"}
+      string: '{"CreatedAt":"2020-09-11T20:05:33-07:00","Driver":"local","Labels":{"deployment_id":"1","name":"690a2d87-08de-4834-8cff-cecce76ecb89","service_id":"1"},"Mountpoint":"/var/lib/docker/volumes/690a2d87-08de-4834-8cff-cecce76ecb89/_data","Name":"690a2d87-08de-4834-8cff-cecce76ecb89","Options":{"device":":/tmp/690a2d87-08de-4834-8cff-cecce76ecb89","o":"addr=192.168.173.10,rw,nfsvers=4,async","type":"nfs"},"Scope":"local"}
 
         '
     http_version:
-  recorded_at: Fri, 11 Sep 2020 17:58:02 GMT
+  recorded_at: Sat, 12 Sep 2020 03:05:33 GMT
 - request:
     method: delete
-    uri: unix:///var/run/docker.sock/v1.16/volumes/690a2d87-08de-4834-8cff-cecce76ecb89
+    uri: https://192.168.173.10:2376/v1.16/volumes/690a2d87-08de-4834-8cff-cecce76ecb89
     body:
       encoding: US-ASCII
       string: ''
@@ -59,17 +59,17 @@ http_interactions:
     headers:
       Api-Version:
       - '1.40'
-      Date:
-      - Fri, 11 Sep 2020 17:58:02 GMT
       Docker-Experimental:
       - 'true'
       Ostype:
       - linux
       Server:
       - Docker/19.03.12 (linux)
+      Date:
+      - Sat, 12 Sep 2020 03:05:33 GMT
     body:
       encoding: ASCII-8BIT
       string: ''
     http_version:
-  recorded_at: Fri, 11 Sep 2020 17:58:02 GMT
+  recorded_at: Sat, 12 Sep 2020 03:05:33 GMT
 recorded_with: VCR 5.1.0
