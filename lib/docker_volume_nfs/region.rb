@@ -19,6 +19,17 @@ module DockerVolumeNfs
       []
     end
 
+    ##
+    # Find all volumes on this region
+    def list_all_volumes
+      d = host_client.remote_exec %Q(ls #{instance.nfs_remote_path})
+      d = d.split("\n")
+      d.delete("metadata.db")
+      d
+    rescue
+      []
+    end
+
     private
 
     # @return [DockerVolumeNfs::SshClient]
