@@ -14,6 +14,8 @@ describe DockerVolumeNfs::Volume do
       assert vol.provisioned?
     end
 
+    refute_nil vol.usage
+
     VCR.use_cassette('volume.destroy') do
       assert vol.destroy
     end

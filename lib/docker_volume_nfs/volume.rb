@@ -58,12 +58,20 @@ module DockerVolumeNfs
       true
     end
 
-    private
+    ##
+    # Returns the volume usage in KB.
+    def usage
+      DockerVolumeNfs::StorageBackend.new(instance.region.nfs_remote_host).usage_for_volume self
+    rescue
+      nil
+    end
 
     # @return [String]
     def volume_path
       %Q(#{instance.region.nfs_remote_path}/#{instance.name})
     end
+
+    private
 
     # @return [Hash]
     def volume_data

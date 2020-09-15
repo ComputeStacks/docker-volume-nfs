@@ -48,6 +48,19 @@ module DockerVolumeNfs
       false
     end
 
+    ##
+    # Find usage for just a single volume
+    #
+    # If no value is found, it will return nil
+    # so you know there was a problem locating the volume.
+    #
+    # @param [Volume] volume
+    def usage_for_volume(volume)
+      data = host_client.remote_exec %Q(sudo bash -c "du --total --block-size 1024 -s #{volume.volume_path} | grep total")
+      data = data.split("\t")[0].strip
+      data.blank? ? nil : data.to_i
+    end
+
     private
 
     # @return [DockerVolumeNfs::SshClient]
