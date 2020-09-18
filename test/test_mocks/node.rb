@@ -19,5 +19,10 @@ module TestMocks
       TestMocks::Region.new
     end
 
+    # @!attribute [Boolean]
+    def online?
+      true
+    end
+
   end
 end

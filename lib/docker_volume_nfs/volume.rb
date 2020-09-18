@@ -18,6 +18,7 @@ module DockerVolumeNfs
     def provisioned?
       result = true
       instance.nodes.each do |node|
+        next unless node.online?
         result = docker_client(node).is_a?(Docker::Volume)
         break unless result # halt if failed
       end
@@ -33,6 +34,7 @@ module DockerVolumeNfs
       end
       instance.nodes.each do |node|
         next unless node.online?
+        next unless docker_client(node).nil?
         result = Docker::Volume.create(instance.name, volume_data, DockerVolumeNfs::Node.new(node).client)
         unless result.is_a?(Docker::Volume)
           errors << "Fatal error provisioning volume on node: #{node.label}"
@@ -48,7 +50,9 @@ module DockerVolumeNfs
       instance.nodes.each do |node|
         next unless node.online?
         client = DockerVolumeNfs::Node.new(node).client
-        success = docker_client(node).remove({}, client).blank?
+        vol_client = docker_client(node)
+        next if vol_client.nil?
+        success = vol_client.remove({}, client).blank?
         break unless success
       end
       unless success
@@ -100,6 +104,8 @@ module DockerVolumeNfs
     # @return [Docker::Volume]
     def docker_client(node)
       Docker::Volume.get(instance.name, DockerVolumeNfs::Node.new(node).client)
+    rescue Docker::Error::NotFoundError
+      nil
     end
 
   end
