@@ -32,6 +32,7 @@ module DockerVolumeNfs
         return false
       end
       instance.nodes.each do |node|
+        next unless node.online?
         result = Docker::Volume.create(instance.name, volume_data, DockerVolumeNfs::Node.new(node).client)
         unless result.is_a?(Docker::Volume)
           errors << "Fatal error provisioning volume on node: #{node.label}"
@@ -45,6 +46,7 @@ module DockerVolumeNfs
     def destroy
       success = true
       instance.nodes.each do |node|
+        next unless node.online?
         client = DockerVolumeNfs::Node.new(node).client
         success = docker_client(node).remove({}, client).blank?
         break unless success
