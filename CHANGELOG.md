@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.5
+
+* Allow specifying a specific nfs host ip for when the controller needs to connect via a different ip address.
+
+***
+
 ## v0.2.4
 
 * Dont create volumes on nodes that already have it. This is specifically for recovering from a node that was offline.

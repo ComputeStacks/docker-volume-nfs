@@ -28,7 +28,7 @@ module DockerVolumeNfs
     # @return [Boolean]
     def create!
       raise VolumeError, 'Missing Volume' if instance.nil?
-      unless DockerVolumeNfs::StorageBackend.new(instance.region.nfs_remote_host).initialize_storage_backend!(volume_path)
+      unless storage_server.initialize_storage_backend!(volume_path)
         errors << "Fatal error provisioning NFS backend"
         return false
       end
@@ -67,7 +67,7 @@ module DockerVolumeNfs
     ##
     # Returns the volume usage in KB.
     def usage
-      DockerVolumeNfs::StorageBackend.new(instance.region.nfs_remote_host).usage_for_volume self
+      storage_server.usage_for_volume self
     rescue
       nil
     end
@@ -98,7 +98,8 @@ module DockerVolumeNfs
 
     # @return [DockerVolumeNfs::StorageBackend]
     def storage_server
-      DockerVolumeNfs::StorageBackend.new(instance.region.nfs_remote_host)
+      ip_addr = instance.region.nfs_controller_ip.blank? ? instance.region.nfs_remote_host : instance.region.nfs_controller_ip
+      DockerVolumeNfs::StorageBackend.new(ip_addr)
     end
 
     # @return [Docker::Volume]
