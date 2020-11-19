@@ -35,7 +35,7 @@ module DockerVolumeNfs
     # @return [DockerVolumeNfs::SshClient]
     def host_client
       DockerVolumeNfs::SshClient.new(
-        instance.nfs_remote_host,
+        instance.nfs_controller_ip,
         DockerVolumeNfs.config[:region_ssh_user],
         DockerVolumeNfs.config[:region_ssh_port].to_i
       )

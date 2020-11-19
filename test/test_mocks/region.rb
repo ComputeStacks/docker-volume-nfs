@@ -17,8 +17,8 @@ module TestMocks
     def initialize
       self.id = 1
       self.nfs_remote_path = "/tmp"
-      self.nfs_remote_host = "192.168.173.10"
-      self.nfs_controller_ip = ''
+      self.nfs_remote_host = ''
+      self.nfs_controller_ip = '192.168.173.10'
     end
 
     # @return [Array]

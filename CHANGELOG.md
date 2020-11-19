@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.6
+
+* Use correct NFS IP Address when connecting over SSH.
+
+***
+
 ## v0.2.5
 
 * Allow specifying a specific nfs host ip for when the controller needs to connect via a different ip address.
