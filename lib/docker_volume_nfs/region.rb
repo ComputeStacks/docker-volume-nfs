@@ -13,7 +13,7 @@ module DockerVolumeNfs
 
     # @return [Array]
     def usage
-      data = host_client.remote_exec %Q(sudo bash -c 'du --block-size 1024 -s #{instance.nfs_remote_path}/*')
+      data = host_client.remote_exec %Q(sudo bash -c 'du --block-size 1K -s #{instance.nfs_remote_path}/*')
       data.gsub("#{instance.nfs_remote_path}/","").split("\n").map {|i| i.split("\t")}.map {|i,k| {size: i.strip, id: k.strip} }
     rescue
       []

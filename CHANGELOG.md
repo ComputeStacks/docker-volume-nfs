@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.7
+
+* Adjust `du` flag.
+
+***
+
 ## v0.2.6
 
 * Use correct NFS IP Address when connecting over SSH.
