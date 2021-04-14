@@ -12,7 +12,6 @@ PATH
   specs:
     docker_volume_nfs (0.2.7)
       activesupport (> 5.0)
-      bcrypt_pbkdf (> 1.0)
       docker-api
       ed25519 (> 1.2)
       net-ssh (> 6.0)
@@ -27,7 +26,6 @@ GEM
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
     ansi (1.5.0)
-    bcrypt_pbkdf (1.1.0)
     builder (3.2.4)
     concurrent-ruby (1.1.7)
     ed25519 (1.2.4)
